@@ -15,9 +15,16 @@ type ButtonProps = {
   variant?: 'saffron' | 'chakra';
   onPress: () => void;
   icon?: React.ReactNode;
+  disabled?: boolean;
 };
 
-export const GlowingButtonNative = ({ title, variant = 'saffron', onPress, icon }: ButtonProps) => {
+export const GlowingButtonNative = ({
+  title,
+  variant = 'saffron',
+  onPress,
+  icon,
+  disabled = false,
+}: ButtonProps) => {
   const scale = useSharedValue(1);
   const glowOpacity = useSharedValue(0.4);
 
@@ -36,12 +43,14 @@ export const GlowingButtonNative = ({ title, variant = 'saffron', onPress, icon 
   });
 
   const handlePressIn = () => {
+    if (disabled) return;
     scale.value = withSpring(0.96, { stiffness: 400, damping: 17 });
     glowOpacity.value = withTiming(0.8, { duration: 150 });
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
   };
 
   const handlePressOut = () => {
+    if (disabled) return;
     scale.value = withSpring(1, { stiffness: 400, damping: 17 });
     glowOpacity.value = withTiming(0.4, { duration: 300 });
   };
@@ -50,11 +59,15 @@ export const GlowingButtonNative = ({ title, variant = 'saffron', onPress, icon 
     <AnimatedPressable
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
-      onPress={onPress}
+      onPress={disabled ? undefined : onPress}
+      disabled={disabled}
       style={[
         styles.button,
         rStyle,
-        { borderColor: isSaffron ? 'rgba(255,95,31,0.4)' : 'rgba(0,229,255,0.4)' }
+        {
+          borderColor: isSaffron ? 'rgba(255,95,31,0.4)' : 'rgba(0,229,255,0.4)',
+          opacity: disabled ? 0.45 : 1,
+        }
       ]}
       className="bg-background-elevated self-center rounded-2xl flex-row items-center justify-center border"
     >

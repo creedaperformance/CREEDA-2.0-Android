@@ -3,11 +3,25 @@ import type { PropsWithChildren } from 'react'
 import type { Session } from '@supabase/supabase-js'
 
 import { fetchMobileMe, type AppRole, type MobileUserEnvelope } from './mobile-api'
+import { mobileEnv } from './env'
 import { supabase, supabaseConfigError } from './supabase'
 
 type AuthResult =
   | { ok: true; needsEmailVerification?: boolean }
   | { ok: false; error: string }
+
+type MobileSignupApiResponse =
+  | {
+      success: true
+      needsEmailVerification: boolean
+      session: {
+        access_token: string
+        refresh_token: string
+      } | null
+    }
+  | {
+      error: string
+    }
 
 type MobileAuthContextValue = {
   session: Session | null
@@ -21,6 +35,13 @@ type MobileAuthContextValue = {
     email: string
     password: string
     role: AppRole
+    coachLockerCode?: string
+    inviteToken?: string
+    termsPrivacyConsent: boolean
+    medicalDisclaimerConsent: boolean
+    dataProcessingConsent: boolean
+    aiAcknowledgementConsent: boolean
+    marketingConsent?: boolean
   }) => Promise<AuthResult>
   signOut: () => Promise<void>
 }
@@ -118,32 +139,67 @@ export function MobileAuthProvider({ children }: PropsWithChildren) {
     email: string
     password: string
     role: AppRole
+    coachLockerCode?: string
+    inviteToken?: string
+    termsPrivacyConsent: boolean
+    medicalDisclaimerConsent: boolean
+    dataProcessingConsent: boolean
+    aiAcknowledgementConsent: boolean
+    marketingConsent?: boolean
   }): Promise<AuthResult> {
     if (supabaseConfigError) {
       return { ok: false, error: supabaseConfigError }
     }
 
-    const { data, error: signUpError } = await supabase.auth.signUp({
-      email: args.email.trim(),
-      password: args.password,
-      options: {
-        data: {
-          full_name: args.fullName.trim(),
-          role: args.role,
-        },
+    const response = await fetch(`${mobileEnv.apiBaseUrl}/api/mobile/auth/signup`, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
       },
+      body: JSON.stringify({
+        fullName: args.fullName.trim(),
+        email: args.email.trim(),
+        password: args.password,
+        role: args.role,
+        coachLockerCode: args.coachLockerCode?.trim() || '',
+        inviteToken: args.inviteToken?.trim() || '',
+        termsPrivacyConsent: args.termsPrivacyConsent,
+        medicalDisclaimerConsent: args.medicalDisclaimerConsent,
+        dataProcessingConsent: args.dataProcessingConsent,
+        aiAcknowledgementConsent: args.aiAcknowledgementConsent,
+        marketingConsent: Boolean(args.marketingConsent),
+      }),
     })
 
-    if (signUpError) {
-      return { ok: false, error: signUpError.message }
+    const payload = (await response.json().catch(() => null)) as MobileSignupApiResponse | null
+    if (!response.ok || !payload || 'error' in payload) {
+      return {
+        ok: false,
+        error:
+          payload && 'error' in payload && typeof payload.error === 'string'
+            ? payload.error
+            : `Signup failed with status ${response.status}.`,
+      }
     }
 
-    setSession(data.session)
-    await hydrateUser(data.session)
+    if (payload.session) {
+      const { data: sessionData, error: setSessionError } = await supabase.auth.setSession({
+        access_token: payload.session.access_token,
+        refresh_token: payload.session.refresh_token,
+      })
+
+      if (setSessionError) {
+        return { ok: false, error: setSessionError.message }
+      }
+
+      setSession(sessionData.session)
+      await hydrateUser(sessionData.session)
+    }
 
     return {
       ok: true,
-      needsEmailVerification: !data.session,
+      needsEmailVerification: payload.needsEmailVerification,
     }
   }
 
@@ -179,4 +235,3 @@ export function useMobileAuth() {
 
   return context
 }
-

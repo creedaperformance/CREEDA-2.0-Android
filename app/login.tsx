@@ -9,21 +9,25 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import { Link, Redirect } from 'expo-router';
+import { Link, Redirect, useLocalSearchParams } from 'expo-router';
 
 import { GlowingButtonNative } from '../src/components/neon/GlowingButtonNative';
 import { NeonGlassCardNative } from '../src/components/neon/NeonGlassCardNative';
 import { useMobileAuth } from '../src/lib/auth';
+import { getPreferredMobileRoute } from '../src/lib/navigation';
 
 export default function LoginScreen() {
-  const { session, signIn, loading } = useMobileAuth();
+  const { session, user, signIn, loading } = useMobileAuth();
+  const params = useLocalSearchParams<{ coach?: string | string[]; invite?: string | string[] }>();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const coachLockerCode = typeof params.coach === 'string' ? params.coach : undefined;
+  const inviteToken = typeof params.invite === 'string' ? params.invite : undefined;
 
-  if (!loading && session) {
-    return <Redirect href="/(tabs)" />;
+  if (!loading && session && user) {
+    return <Redirect href={getPreferredMobileRoute(user, { coachLockerCode, inviteToken })} />;
   }
 
   async function handleSubmit() {
@@ -52,6 +56,11 @@ export default function LoginScreen() {
           <Text className="mt-4 text-sm leading-6 text-white/55">
             This Expo build now uses real Supabase sessions and authenticated CREEDA mobile APIs.
           </Text>
+          {coachLockerCode || inviteToken ? (
+            <Text className="mt-4 text-sm leading-6 text-chakra-neon">
+              Your athlete invite context will be preserved after sign-in.
+            </Text>
+          ) : null}
         </View>
 
         <NeonGlassCardNative watermark="GO">
@@ -92,7 +101,16 @@ export default function LoginScreen() {
           </View>
         </NeonGlassCardNative>
 
-        <Link href="/signup" asChild>
+        <Link
+          href={{
+            pathname: '/signup',
+            params: {
+              ...(coachLockerCode ? { coach: coachLockerCode } : {}),
+              ...(inviteToken ? { invite: inviteToken } : {}),
+            },
+          }}
+          asChild
+        >
           <Pressable className="mt-6 items-center">
             <Text className="text-sm font-semibold text-white/60">
               Need an account? <Text className="text-chakra-neon">Create one</Text>

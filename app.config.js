@@ -58,6 +58,16 @@ module.exports = () => ({
     plugins: [
       'expo-router',
       [
+        'expo-image-picker',
+        {
+          photosPermission:
+            'CREEDA needs photo library access so you can choose and crop a profile avatar from your device.',
+          cameraPermission:
+            'CREEDA needs camera access for on-device posture and video analysis.',
+          microphonePermission: false,
+        },
+      ],
+      [
         'react-native-vision-camera',
         {
           cameraPermissionText: 'CREEDA needs camera access for on-device posture and video analysis.',

@@ -7,15 +7,24 @@ import {
   Text,
   View,
 } from 'react-native';
+import { useRouter } from 'expo-router';
 import {
   Activity,
+  BarChart3,
   Brain,
+  Building2,
+  CalendarDays,
+  ClipboardList,
+  Dumbbell,
   Footprints,
   HeartPulse,
+  MapPin,
   Moon,
   RefreshCw,
   ShieldCheck,
+  Video,
   Target,
+  Timer,
   TrendingUp,
   TriangleAlert,
   Users,
@@ -24,6 +33,7 @@ import {
 import { GlowingButtonNative } from '../../src/components/neon/GlowingButtonNative';
 import { NeonGlassCardNative } from '../../src/components/neon/NeonGlassCardNative';
 import { ReadinessOrbNative } from '../../src/components/neon/ReadinessOrbNative';
+import { ProfileAvatarNative } from '../../src/components/profile/ProfileAvatarNative';
 import { useMobileAuth } from '../../src/lib/auth';
 import { fetchMobileDashboard, type MobileDashboard } from '../../src/lib/mobile-api';
 
@@ -67,7 +77,37 @@ function EmptyState({ title, body }: { title: string; body: string }) {
   );
 }
 
+function QuickActionCard({
+  title,
+  detail,
+  icon: Icon,
+  onPress,
+}: {
+  title: string;
+  detail: string;
+  icon: typeof Activity;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable
+      onPress={onPress}
+      className="rounded-2xl border border-white/5 bg-white/[0.03] px-4 py-4"
+    >
+      <View className="flex-row items-start gap-3">
+        <View className="mt-1 rounded-2xl border border-white/5 bg-white/[0.04] p-2">
+          <Icon color="#00E5FF" size={16} />
+        </View>
+        <View className="flex-1">
+          <Text className="text-sm font-black tracking-tight text-white">{title}</Text>
+          <Text className="mt-2 text-sm leading-6 text-white/55">{detail}</Text>
+        </View>
+      </View>
+    </Pressable>
+  );
+}
+
 export default function HomeScreen() {
+  const router = useRouter();
   const { session, user, error: authError } = useMobileAuth();
   const [dashboard, setDashboard] = useState<MobileDashboard | null>(null);
   const [loading, setLoading] = useState(true);
@@ -150,14 +190,30 @@ export default function HomeScreen() {
             </Text>
           </View>
 
-          <Pressable
-            onPress={() => {
-              void loadDashboard(true);
-            }}
-            className="rounded-2xl border border-white/5 bg-white/[0.04] px-4 py-3"
-          >
-            <RefreshCw color="#00E5FF" size={18} />
-          </Pressable>
+          <View className="items-end gap-3">
+            <Pressable
+              onPress={() => router.push('/(tabs)/account')}
+              className="items-center gap-2"
+            >
+              <ProfileAvatarNative
+                uri={user?.profile.avatarUrl}
+                name={displayName}
+                size={64}
+              />
+              <Text className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/45">
+                Account
+              </Text>
+            </Pressable>
+
+            <Pressable
+              onPress={() => {
+                void loadDashboard(true);
+              }}
+              className="rounded-2xl border border-white/5 bg-white/[0.04] px-4 py-3"
+            >
+              <RefreshCw color="#00E5FF" size={18} />
+            </Pressable>
+          </View>
         </View>
 
         {!user?.profile.onboardingCompleted ? (
@@ -166,6 +222,31 @@ export default function HomeScreen() {
             <Text className="mt-3 text-sm leading-6 text-white/55">
               Your account is authenticated, but CREEDA still marks onboarding as incomplete. The mobile dashboard will stay limited until the profile setup is finished.
             </Text>
+            {user?.profile.role === 'individual' ? (
+              <View className="mt-5">
+                <GlowingButtonNative
+                  title="Start FitStart"
+                  variant="chakra"
+                  onPress={() => router.push('/fitstart')}
+                />
+              </View>
+            ) : user?.profile.role === 'coach' ? (
+              <View className="mt-5">
+                <GlowingButtonNative
+                  title="Complete Coach Setup"
+                  variant="chakra"
+                  onPress={() => router.push('/coach-onboarding')}
+                />
+              </View>
+            ) : user?.profile.role === 'athlete' ? (
+              <View className="mt-5">
+                <GlowingButtonNative
+                  title="Complete Athlete Intake"
+                  variant="chakra"
+                  onPress={() => router.push('/athlete-onboarding')}
+                />
+              </View>
+            ) : null}
           </NeonGlassCardNative>
         ) : null}
 
@@ -236,6 +317,59 @@ export default function HomeScreen() {
                       ? `${dashboard.health.sampleDays} days connected`
                       : 'Manual only'
                   }
+                />
+              </View>
+              <View className="mt-5">
+                <GlowingButtonNative
+                  title="Daily Check-In"
+                  variant="chakra"
+                  onPress={() => router.push('/check-in')}
+                />
+              </View>
+            </NeonGlassCardNative>
+
+            <NeonGlassCardNative>
+              <SectionTitle
+                title="Quick actions"
+                detail="These routes now match the live athlete web app instead of the old Expo placeholders."
+                icon={ClipboardList}
+              />
+              <View className="gap-3">
+                <QuickActionCard
+                  title="Weekly Review"
+                  detail="Open the full athlete weekly review with trend, trust, and identity metrics."
+                  icon={TrendingUp}
+                  onPress={() => router.push('/athlete-review')}
+                />
+                <QuickActionCard
+                  title="Plans"
+                  detail="Open the athlete plans area and the current plan-generation entry point."
+                  icon={Dumbbell}
+                  onPress={() => router.push('/athlete-plans')}
+                />
+                <QuickActionCard
+                  title="Monthly Report"
+                  detail="Open the 28-day athlete performance report with load, readiness, and warning signals."
+                  icon={CalendarDays}
+                  onPress={() => router.push('/athlete-report')}
+                />
+                <QuickActionCard
+                  title="Video Scan"
+                  detail="Open the scan hub, pick a sport, and review recent biomechanical reports."
+                  icon={Video}
+                  onPress={() => router.push('/athlete-scan')}
+                />
+                <QuickActionCard
+                  title="Events"
+                  detail="Browse the athlete event radar and activate event prep from mobile."
+                  icon={MapPin}
+                  onPress={() => router.push('/athlete-events')}
+                />
+                <QuickActionCard
+                  title="Objective Tests"
+                  detail="Open the native objective test lab with protocol history and reaction tap."
+                  icon={Timer}
+                  onPress={() => router.push('/athlete-tests')}
                 />
               </View>
             </NeonGlassCardNative>
@@ -309,6 +443,40 @@ export default function HomeScreen() {
 
             <NeonGlassCardNative>
               <SectionTitle
+                title="Quick actions"
+                detail="Coach review, analytics, academy ops, and report feed are now reachable natively from the mobile home flow."
+                icon={ClipboardList}
+              />
+              <View className="gap-3">
+                <QuickActionCard
+                  title="Weekly Review"
+                  detail="Open the full coach weekly review with priorities, group suggestions, and squad identity."
+                  icon={TrendingUp}
+                  onPress={() => router.push('/coach-review')}
+                />
+                <QuickActionCard
+                  title="Analytics"
+                  detail="Open the full coach analytics layer with squad trends, bottlenecks, and team comparison."
+                  icon={BarChart3}
+                  onPress={() => router.push('/coach-analytics')}
+                />
+                <QuickActionCard
+                  title="Academy Ops"
+                  detail="Manage academy team settings, junior-athlete handoff readiness, and parent communication."
+                  icon={Building2}
+                  onPress={() => router.push('/coach-academy')}
+                />
+                <QuickActionCard
+                  title="Report Feed"
+                  detail="See the biomechanical report feed from athlete movement scans."
+                  icon={Video}
+                  onPress={() => router.push('/coach-reports')}
+                />
+              </View>
+            </NeonGlassCardNative>
+
+            <NeonGlassCardNative>
+              <SectionTitle
                 title="Top priority athletes"
                 detail={
                   dashboard.topPriorityAthletes.length
@@ -360,6 +528,41 @@ export default function HomeScreen() {
                 icon={Target}
               />
               <Text className="text-sm leading-6 text-white/70">{dashboard.explanation}</Text>
+              <View className="mt-5">
+                <GlowingButtonNative
+                  title="Log Today"
+                  variant="chakra"
+                  onPress={() => router.push('/individual-log')}
+                />
+              </View>
+            </NeonGlassCardNative>
+
+            <NeonGlassCardNative>
+              <SectionTitle
+                title="Quick actions"
+                detail="The weekly individual review is now available in mobile alongside your daily direction."
+                icon={ClipboardList}
+              />
+              <View className="gap-3">
+                <QuickActionCard
+                  title="Weekly Review"
+                  detail="Open the full individual weekly review built from FitStart, logs, and device context."
+                  icon={TrendingUp}
+                  onPress={() => router.push('/individual-review')}
+                />
+                <QuickActionCard
+                  title="Movement Scan"
+                  detail="Open the movement scan hub and native report history for your selected sport."
+                  icon={Video}
+                  onPress={() => router.push('/individual-scan')}
+                />
+                <QuickActionCard
+                  title="Objective Tests"
+                  detail="Open the individual objective test lab with live protocol cadence and reaction tap."
+                  icon={Timer}
+                  onPress={() => router.push('/individual-tests')}
+                />
+              </View>
             </NeonGlassCardNative>
 
             {dashboard.today ? (
