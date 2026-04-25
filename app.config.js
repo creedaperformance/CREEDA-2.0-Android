@@ -29,7 +29,12 @@ function readEnvFile(filePath) {
     }, {})
 }
 
-const rootEnv = readEnvFile(path.resolve(__dirname, '../.env.local'))
+// Look for .env.local in this directory first (standalone mobile repo),
+// then fall back to the parent directory (when this lives inside the web monorepo).
+const rootEnv = {
+  ...readEnvFile(path.resolve(__dirname, '../.env.local')),
+  ...readEnvFile(path.resolve(__dirname, '.env.local')),
+}
 
 function resolveEnvValue(...keys) {
   for (const key of keys) {
