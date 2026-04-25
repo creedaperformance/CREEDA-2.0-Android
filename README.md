@@ -57,10 +57,10 @@ Create `.env.local` in this repo's root. Both `EXPO_PUBLIC_*` (preferred) and `N
 ```
 EXPO_PUBLIC_SUPABASE_URL=https://<project-ref>.supabase.co
 EXPO_PUBLIC_SUPABASE_ANON_KEY=eyJ...
-EXPO_PUBLIC_API_BASE_URL=https://<your-web-deploy-url>
+EXPO_PUBLIC_API_BASE_URL=https://www.creeda.in
 ```
 
-`EXPO_PUBLIC_API_BASE_URL` should point at your deployed web app (e.g., `https://creeda.app`) — that's where the mobile-facing API routes (`/api/mobile/*`) live.
+`EXPO_PUBLIC_API_BASE_URL` should point at your deployed web app (currently `https://www.creeda.in`) — that's where the mobile-facing API routes (`/api/mobile/*`) live.
 
 ---
 
