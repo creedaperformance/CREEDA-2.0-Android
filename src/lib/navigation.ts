@@ -1,4 +1,5 @@
 import type { MobileUserEnvelope } from './mobile-api';
+import { mobileEnv } from './env';
 
 export type AthleteInviteContext = {
   coachLockerCode?: string | null;
@@ -34,6 +35,10 @@ export function getPreferredMobileRoute(
   user: MobileUserEnvelope | null,
   context?: AthleteInviteContext | null
 ) {
+  if (mobileEnv.onboardingV2Enabled && user && !user.profile.onboardingCompleted) {
+    return withAthleteInviteContext(`/onboarding-v2?persona=${user.profile.role}`, context);
+  }
+
   if (user?.profile.role === 'athlete' && !user.profile.onboardingCompleted) {
     return withAthleteInviteContext('/athlete-onboarding', context);
   }

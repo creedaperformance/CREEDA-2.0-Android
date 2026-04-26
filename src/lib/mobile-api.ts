@@ -1,4 +1,5 @@
 import { mobileEnv } from './env'
+import type { OnboardingV2SafetyGateSubmission } from '../../packages/schemas/src'
 
 export type AppRole = 'athlete' | 'coach' | 'individual'
 
@@ -670,6 +671,17 @@ export interface CoachOnboardingResponse {
   teamName: string
 }
 
+export interface OnboardingV2SafetyGateResponse {
+  success: true
+  modifiedModeActive: boolean
+  profileCalibrationPct: number
+  confidence: {
+    tier: 'low' | 'medium' | 'high' | 'locked'
+    pct: number
+  }
+  destination: string
+}
+
 export interface IndividualMobileDashboard {
   type: 'individual'
   readinessScore: number
@@ -1311,6 +1323,20 @@ export function submitCoachOnboarding(
     method: 'POST',
     body: JSON.stringify(payload),
   })
+}
+
+export function submitOnboardingV2SafetyGate(
+  accessToken: string,
+  payload: OnboardingV2SafetyGateSubmission
+) {
+  return apiFetch<OnboardingV2SafetyGateResponse>(
+    '/api/mobile/onboarding/v2/safety',
+    accessToken,
+    {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }
+  )
 }
 
 export function fetchHealthConnection(accessToken: string) {

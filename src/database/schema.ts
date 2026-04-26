@@ -1,7 +1,7 @@
 import { appSchema, tableSchema } from '@nozbe/watermelondb'
 
 export const schema = appSchema({
-  version: 1,
+  version: 2,
   tables: [
     tableSchema({
       name: 'profiles',
@@ -29,6 +29,18 @@ export const schema = appSchema({
         { name: 'body', type: 'string' },
         { name: 'is_read', type: 'boolean' },
         { name: 'created_at', type: 'number' },
+      ],
+    }),
+    tableSchema({
+      name: 'onboarding_v2_submissions',
+      columns: [
+        { name: 'user_id', type: 'string', isIndexed: true },
+        { name: 'persona', type: 'string' },
+        { name: 'payload_json', type: 'string' },
+        { name: 'status', type: 'string', isIndexed: true },
+        { name: 'remote_error', type: 'string', isOptional: true },
+        { name: 'created_at_ms', type: 'number' },
+        { name: 'updated_at_ms', type: 'number' },
       ],
     }),
   ],

@@ -1,9 +1,17 @@
 import React from 'react';
 import { View, Text } from 'react-native';
 
-export const NeonGlassCardNative = ({ children, watermark }: { children: React.ReactNode; watermark?: string }) => {
+export const NeonGlassCardNative = ({
+  children,
+  watermark,
+  className = '',
+}: {
+  children: React.ReactNode;
+  watermark?: string;
+  className?: string;
+}) => {
   return (
-    <View className="rounded-3xl border border-white/5 bg-background-glass overflow-hidden p-6 my-2 relative">
+    <View className={`rounded-3xl border border-white/5 bg-background-glass overflow-hidden p-6 my-2 relative ${className}`}>
       {/* Fake Aura Blob behind using absolute positioning & opacity */}
       <View className="absolute -top-[50%] -left-[20%] w-[150%] h-[150%] bg-[#FF5F1F] opacity-[0.03] rounded-full blur-[50px] pointer-events-none" />
       

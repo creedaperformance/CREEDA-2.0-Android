@@ -4,6 +4,7 @@ type ExpoExtra = {
   supabaseUrl?: string
   supabaseAnonKey?: string
   apiBaseUrl?: string
+  onboardingV2Enabled?: boolean | string
 }
 
 type LegacyConstants = typeof Constants & {
@@ -47,7 +48,10 @@ export const mobileEnv = {
   apiBaseUrl: stripTrailingSlash(
     extra.apiBaseUrl || process.env.EXPO_PUBLIC_API_BASE_URL || resolveDevApiBaseUrl()
   ),
+  onboardingV2Enabled:
+    extra.onboardingV2Enabled === true ||
+    extra.onboardingV2Enabled === 'true' ||
+    process.env.EXPO_PUBLIC_ONBOARDING_V2_ENABLED === 'true',
 }
 
 export const hasSupabaseConfig = Boolean(mobileEnv.supabaseUrl && mobileEnv.supabaseAnonKey)
-

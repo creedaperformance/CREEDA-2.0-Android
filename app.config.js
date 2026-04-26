@@ -103,6 +103,7 @@ module.exports = () => ({
       supabaseUrl: resolveEnvValue('EXPO_PUBLIC_SUPABASE_URL', 'NEXT_PUBLIC_SUPABASE_URL'),
       supabaseAnonKey: resolveEnvValue('EXPO_PUBLIC_SUPABASE_ANON_KEY', 'NEXT_PUBLIC_SUPABASE_ANON_KEY'),
       apiBaseUrl: resolveEnvValue('EXPO_PUBLIC_API_BASE_URL', 'NEXT_PUBLIC_SITE_URL'),
+      onboardingV2Enabled: resolveEnvValue('EXPO_PUBLIC_ONBOARDING_V2_ENABLED') === 'true',
     },
   },
 })

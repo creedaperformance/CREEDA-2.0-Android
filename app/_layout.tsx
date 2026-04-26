@@ -11,6 +11,7 @@ export default function RootLayout() {
         <Stack.Screen name="index" options={{ headerShown: false }} />
         <Stack.Screen name="login" options={{ headerShown: false }} />
         <Stack.Screen name="signup" options={{ headerShown: false }} />
+        <Stack.Screen name="onboarding-v2" options={{ headerShown: false }} />
         <Stack.Screen name="athlete-onboarding" options={{ headerShown: false }} />
         <Stack.Screen name="athlete-event/[id]" options={{ headerShown: false }} />
         <Stack.Screen name="athlete-events" options={{ headerShown: false }} />

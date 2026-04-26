@@ -27,3 +27,15 @@ export class Notification extends Model {
   @field('is_read') isRead!: boolean
   @readonly @date('created_at') createdAt!: Date
 }
+
+export class OnboardingV2Submission extends Model {
+  static table = 'onboarding_v2_submissions'
+
+  @field('user_id') userId!: string
+  @field('persona') persona!: string
+  @field('payload_json') payloadJson!: string
+  @field('status') status!: 'queued' | 'synced' | 'failed'
+  @field('remote_error') remoteError!: string | null
+  @field('created_at_ms') createdAtMs!: number
+  @field('updated_at_ms') updatedAtMs!: number
+}
