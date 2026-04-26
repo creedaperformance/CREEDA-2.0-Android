@@ -1,9 +1,12 @@
 import { Q } from '@nozbe/watermelondb';
 
-import type { OnboardingV2SafetyGateSubmission } from '../../../packages/schemas/src';
+import type {
+  OnboardingV2Phase1Submission,
+  OnboardingV2SafetyGateSubmission,
+} from '../../../packages/schemas/src';
 import { database } from '../../database';
 import type { OnboardingV2Submission } from '../../database/models';
-import { submitOnboardingV2SafetyGate } from '../mobile-api';
+import { submitOnboardingV2Phase1, submitOnboardingV2SafetyGate } from '../mobile-api';
 
 const TABLE = 'onboarding_v2_submissions';
 
@@ -14,6 +17,20 @@ function getCollection() {
 export async function queueOnboardingV2SafetyGate(
   userId: string,
   payload: OnboardingV2SafetyGateSubmission
+) {
+  return queueOnboardingV2Submission(userId, payload);
+}
+
+export async function queueOnboardingV2Phase1(
+  userId: string,
+  payload: OnboardingV2Phase1Submission
+) {
+  return queueOnboardingV2Submission(userId, payload);
+}
+
+async function queueOnboardingV2Submission(
+  userId: string,
+  payload: OnboardingV2SafetyGateSubmission | OnboardingV2Phase1Submission
 ) {
   let queuedId = '';
   const now = Date.now();
@@ -33,6 +50,12 @@ export async function queueOnboardingV2SafetyGate(
   });
 
   return queuedId;
+}
+
+function isPhase1Payload(
+  payload: OnboardingV2SafetyGateSubmission | OnboardingV2Phase1Submission
+): payload is OnboardingV2Phase1Submission {
+  return 'identity' in payload && 'sport' in payload;
 }
 
 export async function markOnboardingV2SubmissionSynced(queuedId: string) {
@@ -67,8 +90,14 @@ export async function syncQueuedOnboardingV2Submissions(accessToken: string) {
 
   for (const record of queued) {
     try {
-      const payload = JSON.parse(record.payloadJson) as OnboardingV2SafetyGateSubmission;
-      await submitOnboardingV2SafetyGate(accessToken, payload);
+      const payload = JSON.parse(record.payloadJson) as
+        | OnboardingV2SafetyGateSubmission
+        | OnboardingV2Phase1Submission;
+      if (isPhase1Payload(payload)) {
+        await submitOnboardingV2Phase1(accessToken, payload);
+      } else {
+        await submitOnboardingV2SafetyGate(accessToken, payload);
+      }
       await markOnboardingV2SubmissionSynced(record.id);
     } catch (error) {
       await markOnboardingV2SubmissionFailed(
