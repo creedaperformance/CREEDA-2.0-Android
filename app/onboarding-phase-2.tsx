@@ -34,6 +34,11 @@ import {
   queueOnboardingV2Phase2,
 } from '../src/lib/onboarding-v2/offline-store';
 import {
+  scheduleOnboardingV2DailyRitualReminder,
+  scheduleOnboardingV2Phase2Reminders,
+  scheduleOnboardingV2RetestReminders,
+} from '../src/lib/onboarding-v2/reminders';
+import {
   submitOnboardingV2Phase2,
   type OnboardingV2Phase2Response,
 } from '../src/lib/mobile-api';
@@ -370,6 +375,14 @@ export default function OnboardingPhase2Screen() {
       setResult(response);
       setCompletedDays(response.completedDays);
       setCalibrationPct(response.profileCalibrationPct);
+      if (response.completedDays.length === 1) {
+        await scheduleOnboardingV2Phase2Reminders();
+      }
+      if (activeDay === 'day7_environment') {
+        await scheduleOnboardingV2DailyRitualReminder();
+        await scheduleOnboardingV2RetestReminders();
+        setMessage('Phase 2 complete. Daily ritual and retest reminders are ready on this device.');
+      }
       await refreshUser();
       if (activeDay !== 'day7_environment') {
         setActiveDay(nextDay(activeDay));
@@ -385,6 +398,10 @@ export default function OnboardingPhase2Screen() {
       setMessage('Saved offline first. Phase 2 will sync when the backend is reachable.');
       if (!completedDays.includes(activeDay)) {
         setCompletedDays((current) => [...current, activeDay]);
+      }
+      if (activeDay === 'day7_environment') {
+        await scheduleOnboardingV2DailyRitualReminder();
+        await scheduleOnboardingV2RetestReminders();
       }
       if (activeDay !== 'day7_environment') {
         setActiveDay(nextDay(activeDay));
@@ -492,10 +509,16 @@ export default function OnboardingPhase2Screen() {
                 onPress={submitDay}
               />
               <Pressable
-                onPress={() => router.replace('/(tabs)')}
+                onPress={() =>
+                  activeDay === 'day7_environment'
+                    ? router.push('/daily-ritual')
+                    : router.replace('/(tabs)')
+                }
                 className="min-h-12 flex-row items-center justify-center gap-2"
               >
-                <Text className="text-sm font-bold text-white/58">Open dashboard</Text>
+                <Text className="text-sm font-bold text-white/58">
+                  {activeDay === 'day7_environment' ? 'Open daily ritual' : 'Open dashboard'}
+                </Text>
                 <ArrowRight color="rgba(255,255,255,0.58)" size={16} />
               </Pressable>
             </>

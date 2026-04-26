@@ -321,9 +321,9 @@ export default function HomeScreen() {
               </View>
               <View className="mt-5">
                 <GlowingButtonNative
-                  title="Daily Check-In"
+                  title="Daily Ritual"
                   variant="chakra"
-                  onPress={() => router.push('/check-in')}
+                  onPress={() => router.push('/daily-ritual')}
                 />
               </View>
             </NeonGlassCardNative>
@@ -335,6 +335,12 @@ export default function HomeScreen() {
                 icon={ClipboardList}
               />
               <View className="gap-3">
+                <QuickActionCard
+                  title="Full Check-In"
+                  detail="Open the detailed athlete check-in when yesterday's session context matters."
+                  icon={HeartPulse}
+                  onPress={() => router.push('/check-in')}
+                />
                 <QuickActionCard
                   title="Weekly Review"
                   detail="Open the full athlete weekly review with trend, trust, and identity metrics."
@@ -530,9 +536,9 @@ export default function HomeScreen() {
               <Text className="text-sm leading-6 text-white/70">{dashboard.explanation}</Text>
               <View className="mt-5">
                 <GlowingButtonNative
-                  title="Log Today"
+                  title="Daily Ritual"
                   variant="chakra"
-                  onPress={() => router.push('/individual-log')}
+                  onPress={() => router.push('/daily-ritual')}
                 />
               </View>
             </NeonGlassCardNative>
@@ -544,6 +550,12 @@ export default function HomeScreen() {
                 icon={ClipboardList}
               />
               <View className="gap-3">
+                <QuickActionCard
+                  title="Full Daily Log"
+                  detail="Open the detailed individual log when training, steps, and hydration need a full entry."
+                  icon={HeartPulse}
+                  onPress={() => router.push('/individual-log')}
+                />
                 <QuickActionCard
                   title="Weekly Review"
                   detail="Open the full individual weekly review built from FitStart, logs, and device context."

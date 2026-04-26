@@ -309,6 +309,26 @@ export const OnboardingV2Phase2SubmissionSchema = z
     }
   });
 
+export const OnboardingV2DailyRitualSubmissionSchema = z.object({
+  phase: z.literal(3).default(3),
+  persona: z.enum(['athlete', 'individual']),
+  source: PersonaSourceSchema,
+  date: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .optional(),
+  energy: z.number().int().min(1).max(5),
+  body_feel: z.number().int().min(1).max(5),
+  mental_load: z.number().int().min(1).max(5),
+  sleep_hours_self: z.number().min(0).max(16).optional(),
+  sleep_quality_self: z.number().int().min(1).max(10).optional(),
+  pain_locations: z.array(z.string().trim().min(1).max(60)).max(8).default([]),
+  pain_scores: z.record(z.string(), z.number().int().min(0).max(10)).default({}),
+  apsq3: z.array(z.number().int().min(0).max(4)).length(3).optional(),
+  wants_recovery_day: z.boolean().default(false),
+  completion_seconds: z.number().int().min(0).max(180).optional(),
+});
+
 export const OnboardingV2Phase1SubmissionSchema = z
   .object({
     phase: z.literal(1).default(1),
@@ -351,4 +371,7 @@ export type NutritionProfile = z.infer<typeof NutritionProfileSchema>;
 export type OnboardingV2Phase2Day = z.infer<typeof OnboardingV2Phase2DaySchema>;
 export type OnboardingV2Phase2Submission = z.infer<
   typeof OnboardingV2Phase2SubmissionSchema
+>;
+export type OnboardingV2DailyRitualSubmission = z.infer<
+  typeof OnboardingV2DailyRitualSubmissionSchema
 >;

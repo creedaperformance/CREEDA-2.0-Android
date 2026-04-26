@@ -1,6 +1,7 @@
 import { Q } from '@nozbe/watermelondb';
 
 import type {
+  OnboardingV2DailyRitualSubmission,
   OnboardingV2Phase1Submission,
   OnboardingV2Phase2Submission,
   OnboardingV2SafetyGateSubmission,
@@ -10,6 +11,7 @@ import type { OnboardingV2Submission } from '../../database/models';
 import {
   submitOnboardingV2Phase1,
   submitOnboardingV2Phase2,
+  submitOnboardingV2DailyRitual,
   submitOnboardingV2SafetyGate,
 } from '../mobile-api';
 
@@ -40,12 +42,20 @@ export async function queueOnboardingV2Phase2(
   return queueOnboardingV2Submission(userId, payload);
 }
 
+export async function queueOnboardingV2DailyRitual(
+  userId: string,
+  payload: OnboardingV2DailyRitualSubmission
+) {
+  return queueOnboardingV2Submission(userId, payload);
+}
+
 async function queueOnboardingV2Submission(
   userId: string,
   payload:
     | OnboardingV2SafetyGateSubmission
     | OnboardingV2Phase1Submission
     | OnboardingV2Phase2Submission
+    | OnboardingV2DailyRitualSubmission
 ) {
   let queuedId = '';
   const now = Date.now();
@@ -72,6 +82,7 @@ function isPhase1Payload(
     | OnboardingV2SafetyGateSubmission
     | OnboardingV2Phase1Submission
     | OnboardingV2Phase2Submission
+    | OnboardingV2DailyRitualSubmission
 ): payload is OnboardingV2Phase1Submission {
   return 'identity' in payload && 'sport' in payload;
 }
@@ -81,8 +92,19 @@ function isPhase2Payload(
     | OnboardingV2SafetyGateSubmission
     | OnboardingV2Phase1Submission
     | OnboardingV2Phase2Submission
+    | OnboardingV2DailyRitualSubmission
 ): payload is OnboardingV2Phase2Submission {
   return 'day' in payload && payload.phase === 2;
+}
+
+function isDailyRitualPayload(
+  payload:
+    | OnboardingV2SafetyGateSubmission
+    | OnboardingV2Phase1Submission
+    | OnboardingV2Phase2Submission
+    | OnboardingV2DailyRitualSubmission
+): payload is OnboardingV2DailyRitualSubmission {
+  return 'phase' in payload && payload.phase === 3 && 'energy' in payload && 'body_feel' in payload;
 }
 
 export async function markOnboardingV2SubmissionSynced(queuedId: string) {
@@ -120,11 +142,14 @@ export async function syncQueuedOnboardingV2Submissions(accessToken: string) {
       const payload = JSON.parse(record.payloadJson) as
         | OnboardingV2SafetyGateSubmission
         | OnboardingV2Phase1Submission
-        | OnboardingV2Phase2Submission;
+        | OnboardingV2Phase2Submission
+        | OnboardingV2DailyRitualSubmission;
       if (isPhase1Payload(payload)) {
         await submitOnboardingV2Phase1(accessToken, payload);
       } else if (isPhase2Payload(payload)) {
         await submitOnboardingV2Phase2(accessToken, payload);
+      } else if (isDailyRitualPayload(payload)) {
+        await submitOnboardingV2DailyRitual(accessToken, payload);
       } else {
         await submitOnboardingV2SafetyGate(accessToken, payload);
       }

@@ -1,5 +1,6 @@
 import { mobileEnv } from './env'
 import type {
+  OnboardingV2DailyRitualSubmission,
   OnboardingV2Phase1Submission,
   OnboardingV2Phase2Submission,
   OnboardingV2SafetyGateSubmission,
@@ -722,6 +723,32 @@ export interface OnboardingV2Phase2Response {
   }
 }
 
+export interface OnboardingV2DailyRitualResponse {
+  success: true
+  date: string
+  readiness: {
+    score: number
+    directive: string
+    confidence: {
+      tier: string
+      pct: number
+    }
+  }
+  confidence: {
+    tier: 'low' | 'medium' | 'high' | 'locked'
+    pct: number
+  }
+  profileCalibrationPct: number
+  completedDates: string[]
+  branchFlags: {
+    sleep_followup: boolean
+    pain_followup: boolean
+    stress_followup: boolean
+    recovery_requested: boolean
+  }
+  destination: string
+}
+
 export interface IndividualMobileDashboard {
   type: 'individual'
   readinessScore: number
@@ -1399,6 +1426,20 @@ export function submitOnboardingV2Phase2(
 ) {
   return apiFetch<OnboardingV2Phase2Response>(
     '/api/mobile/onboarding/v2/phase2',
+    accessToken,
+    {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }
+  )
+}
+
+export function submitOnboardingV2DailyRitual(
+  accessToken: string,
+  payload: OnboardingV2DailyRitualSubmission
+) {
+  return apiFetch<OnboardingV2DailyRitualResponse>(
+    '/api/mobile/onboarding/v2/daily-ritual',
     accessToken,
     {
       method: 'POST',
